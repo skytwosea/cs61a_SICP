@@ -424,7 +424,25 @@ def final_strategy(score, opponent_score):
     *** YOUR DESCRIPTION HERE ***
     """
     # BEGIN PROBLEM 12
-    return 6  # Replace this statement
+    # return 6
+
+    # MARGIN
+    # if player score is less than opponent score, use a lower MARGIN to assess strategies
+    # if player score is higher, use a higher MARGIN (taking less risk?)
+    if (score - opponent_score < 0):
+        # player is losing to opponent
+        margin = 0
+    else:
+        # player is winning
+        margin =  score - opponent_score // 2
+
+    if (margin % 2 == 0):
+        num_rolls = bacon_strategy(score, opponent_score, margin=margin, num_rolls=5)
+    else:
+        num_rolls = swap_strategy(score, opponent_score, margin=margin, num_rolls=5)
+
+    return num_rolls
+
     # END PROBLEM 12
 
 ##########################
