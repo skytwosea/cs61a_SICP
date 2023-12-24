@@ -25,7 +25,19 @@ def num_sevens(x):
     ...       ['Assign', 'AugAssign'])
     True
     """
-    "*** YOUR CODE HERE ***"
+
+    if x < 7:
+        return 0
+    if x == 7:
+        return 1
+    return 1 + num_sevens(x // 10) if x % 10 == 7 else num_sevens(x // 10)
+
+
+
+
+
+# a = lambda x: x + 1
+# s = lambda x: x - 1
 
 def pingpong(n):
     """Return the nth element of the ping-pong sequence.
@@ -59,7 +71,24 @@ def pingpong(n):
     >>> check(HW_SOURCE_FILE, 'pingpong', ['Assign', 'AugAssign'])
     True
     """
-    "*** YOUR CODE HERE ***"
+    def pp(k, value, chooser):
+        if k >= n:
+            return value
+        if k % 7 == 0 or num_sevens(k) > 0:
+            return pp(k+1,
+                      ((lambda x: x-1) if chooser == "up" else (lambda x: x+1))(value),
+                      ("down" if chooser == "up" else "up"))
+        return pp(k+1,
+                  ((lambda x: x+1) if chooser == "up" else (lambda x: x-1))(value),
+                  chooser)
+    
+    return pp(1, 1, "up")
+
+
+
+
+
+from math import log
 
 def count_change(total):
     """Return the number of ways to make change for total.
@@ -77,7 +106,28 @@ def count_change(total):
     >>> check(HW_SOURCE_FILE, 'count_change', ['While', 'For'])
     True
     """
-    "*** YOUR CODE HERE ***"
+
+    def partitions(n, m):
+        if n == 0:
+            return 1
+
+        elif n < 0 or m == 0:
+            return 0
+
+        elif not (log(m, 2)).is_integer():
+            return partitions(n, m-1)
+
+        else:
+            wm = partitions(n-m, m)
+            wom = partitions(n, m-1)
+            return wm + wom
+
+    return partitions(total, total)
+
+
+
+
+
 
 def missing_digits(n):
     """Given a number a that is in sorted, increasing order,
@@ -98,7 +148,25 @@ def missing_digits(n):
     >>> check(HW_SOURCE_FILE, 'missing_digits', ['While', 'For'])
     True
     """
-    "*** YOUR CODE HERE ***"
+    nset = {int(i) for i in list(str(n))}
+    nrng = set(range(min(nset), max(nset)+1) )
+
+    def identifier(n, missing):
+        if n <= 0:
+            return len(missing)
+        else:
+            current = n % 10
+            if current in missing:
+                missing.discard(current)
+        return identifier(n//10, missing)
+
+    return identifier(n, nrng)
+
+
+
+
+
+
 
 
 ###################
@@ -107,7 +175,7 @@ def missing_digits(n):
 
 def print_move(origin, destination):
     """Print instructions to move a disk."""
-    print("Move the top disk from rod", origin, "to rod", destination)
+    print(f"Move the top disk from rod {origin} to rod {destination}")
 
 def move_stack(n, start, end):
     """Print the moves required to move n disks on the start pole to the end
@@ -139,6 +207,50 @@ def move_stack(n, start, end):
     assert 1 <= start <= 3 and 1 <= end <= 3 and start != end, "Bad start/end"
     "*** YOUR CODE HERE ***"
 
+    # if original stack has even number of disks, first move goes to non-target position
+    # if original stack has ODD  number of disks, first move goes to TARGET     position
+
+    # recursive steps:
+        # move top N-1 disks on to the spare peg
+        # move disk N to the target peg
+        # move the stack N-1 onto the target peg
+
+    """
+    three disks is the base set of moves that is recursed.
+    three disks: first move goes to target
+    four  disks: first move goes to spare
+    wherever the first of a three-disk move goes, that is where the stack of three will land
+    so  if n is ODD,  first move goes to TARGET
+    and if n is EVEN, first move goes to SPARE
+    """
+
+    # visualize: (incomplete)
+    # poles = [[],[],[]]
+    # m = 0
+    # while m < n:
+    #     poles[start].append(chr(m+97))
+    #     m += 1
+
+    # define which peg is auxiliary (spare)
+    p = [1,2,3]
+    p.remove(start)
+    p.remove(end)
+    spare = p[0]
+
+    def hanoi(n, orig, dest, auxx):
+        if n == 1:
+            # print(f"Move the top disk from rod {orig} to rod {dest}")
+            print_move(orig, dest)
+            return
+        hanoi(n-1, orig, auxx, dest)
+        # print(f"Move the top disk from rod {orig} to rod {dest}")
+        print_move(orig, dest)
+        hanoi(n-1, auxx, dest, orig)
+
+    return hanoi(n, start, end, spare)
+
+
+
 from operator import sub, mul
 
 def make_anonymous_factorial():
@@ -151,4 +263,5 @@ def make_anonymous_factorial():
     >>> check(HW_SOURCE_FILE, 'make_anonymous_factorial', ['Assign', 'AugAssign', 'FunctionDef', 'Recursion'])
     True
     """
-    return 'YOUR_EXPRESSION_HERE'
+    # definitely didn't solve this one on my own :(
+    return (lambda f: f(f))(lambda f: lambda n: 1 if n==1 else mul(n,f(f)(n-1)))
