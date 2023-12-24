@@ -3,6 +3,7 @@
 from utils import *
 from ucb import main, interact, trace
 from datetime import datetime
+import re
 
 
 ###########
@@ -17,11 +18,10 @@ def choose(paragraphs, select, k):
     """
     # BEGIN PROBLEM 1
     for p in paragraphs:
-        if select(p) and k == 0:
-            return p
-        elif select(p) and k > 0:
+        if select(p):
+            if k == 0:
+                return p
             k -= 1
-            continue
     return ""
     # END PROBLEM 1
 
@@ -38,7 +38,10 @@ def about(topic):
     """
     assert all([lower(x) == x for x in topic]), 'topics should be lowercase.'
     # BEGIN PROBLEM 2
-    "*** YOUR CODE HERE ***"
+    def selector(p):
+        p = [re.sub(r'\W+','',x).lower() for x in p.split()]
+        return any(x in p for x in topic)
+    return selector
     # END PROBLEM 2
 
 
@@ -62,7 +65,14 @@ def accuracy(typed, reference):
     typed_words = split(typed)
     reference_words = split(reference)
     # BEGIN PROBLEM 3
-    "*** YOUR CODE HERE ***"
+    # a bit overwrought...
+    if len(typed_words) == 0:
+        return 0.0
+    word_status = [1 if word in reference_words[i] else 0 for i, word in enumerate(typed_words[:len(reference_words)])]
+    if len(reference_words) < len(typed_words):
+        extras = [0 for word in typed_words[len(reference_words):]]
+        word_status.extend(extras)
+    return ( sum(word_status) / len(word_status) ) * 100
     # END PROBLEM 3
 
 
@@ -70,7 +80,9 @@ def wpm(typed, elapsed):
     """Return the words-per-minute (WPM) of the TYPED string."""
     assert elapsed > 0, 'Elapsed time must be positive'
     # BEGIN PROBLEM 4
-    "*** YOUR CODE HERE ***"
+    w   = len(list(typed)) / 5
+    wpm = w / (elapsed / 60)
+    return wpm
     # END PROBLEM 4
 
 
@@ -80,7 +92,13 @@ def autocorrect(user_word, valid_words, diff_function, limit):
     than LIMIT.
     """
     # BEGIN PROBLEM 5
-    "*** YOUR CODE HERE ***"
+    if user_word in valid_words:
+        return user_word
+    diffdict = {valid : diff_function(user_word, valid, limit) for valid in valid_words}
+    diffdict = dict(filter(lambda x: x[1] <= limit, diffdict.items()))
+    if len(diffdict) == 0:
+        return user_word
+    return min(diffdict, key=diffdict.get)
     # END PROBLEM 5
 
 
